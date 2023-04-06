@@ -35,7 +35,7 @@
 
             locName = locInfo[0].split('#');
             
-            location.name = locName[1];
+            location.name = locName[1].replace(/^\s+|\s+$/gm,'');
             location.id = locName[0].replace("Map ", "").replace(/^\s+|\s+$/gm,'');
             location.pokemon = {};
 
