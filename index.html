@@ -14,8 +14,7 @@
 
         let rawData = await fetch(`./fusion.txt`)
             
-        rawData = await rawData.json();
-        rawData = rawData.contents;
+        rawData = await rawData;
 
         locBlocks = rawData.split(/##+\d*/)
 
