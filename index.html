@@ -1,22 +1,60 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <title>Pokemon Infinite Locator</title>
 </head>
+
 <body>
-    
+
 </body>
 <script>
-    fetch("https://pastebin.com/raw/jpNve4qK", {
-        mode: 'cors',
-        method: 'GET'
-    })
-    .then((response) => {
-        rawData = response;
-        locationBlocks = rawData.split("#######################");
+    async function fetchData() {
 
-        console.log(locationBlocks);
-    });
+        let rawData = await fetch(`./fusion.txt`)
+            
+        rawData = await rawData.json();
+        rawData = rawData.contents;
+
+        locBlocks = rawData.split(/##+\d*/)
+
+        locations = [];
+
+        locBlocks.forEach(loc => {
+            if(loc === "") { return; }
+
+            var locInfo = loc.split(/\r\n+/);
+
+            if(locInfo[0] === "") {
+                locInfo.shift();
+            }
+
+            if(locInfo[0] === "") { return; }
+
+            let location = {};
+            location.name = locInfo[0];
+            location.pokemon = {};
+
+            let locationId = "";
+            for(var i = 1; i<locInfo.length; i++) {
+                var iLoc = locInfo[i];
+                if((/Land|Water|OldRod|GoodRod|SuperRod|Cave|LandDay|LandNight|LandMorning|RockSmash/).test(iLoc)) {
+                    locationId = iLoc.toLowerCase();
+                    location.pokemon[locationId] = [];
+                }else if ((/^(\d+,)+/).test(iLoc)) {
+                    continue;
+                } else {
+                    location.pokemon[locationId].push(iLoc);
+                }
+            }
+            
+            locations.push(location);
+        });
+    }
+
+
+    fetchData();
 </script>
+
 </html>
