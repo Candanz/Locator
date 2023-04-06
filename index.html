@@ -36,7 +36,7 @@
             locName = locInfo[0].split('#');
             
             location.name = locName[1];
-            location.id = locName[0].replace("Map ", "").trim();
+            location.id = locName[0].replace("Map ", "").replace(/^\s+|\s+$/gm,'');
             location.pokemon = {};
 
             let locationId = "";
