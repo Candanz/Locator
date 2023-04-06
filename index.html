@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Pokemon Infinite Locator</title>
+</head>
+<body>
+    
+</body>
+<script>
+    fetch("https://pastebin.com/raw/jpNve4qK")
+    .then((response) => {
+        rawData = response;
+        locationBlocks = rawData.split("#######################");
+
+        console.log(locationBlocks);
+    });
+</script>
+</html>
