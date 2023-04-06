@@ -1,63 +1,214 @@
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="dark">
 
 <head>
     <meta charset="UTF-8" />
     <title>Pokemon Infinite Locator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightshade.min.css" rel="stylesheet">
 </head>
 
 <body>
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Pokemon Infinite Locator</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="form-control form-control-dark w-100">Modern Mode</span>
+        <div class="navbar-nav">
+            
+        </div>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4 col-lg-4"></div>
+            <main class="col-md-4 col-lg-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Location Checker</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <input class="form-control" list="locationList" id="locationSelector" Placeholder="Search for map"/>
+                            <datalist id="locationList">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+                <div id="locationInfo"></div>
+            </main>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/js/darkmode.min.js"></script>
+        <script>
+            async function fetchData() {
+        
+                let rawData = await fetch(`./fusion.txt`)
+        
+                rawData = await rawData.text();
+        
+                locBlocks = rawData.split(/##+\d*/)
+        
+                locations = [];
+        
+                locBlocks.forEach(loc => {
+                    if (loc === "") { return; }
+        
+                    var locInfo = loc.split(/\r\n+/);
+        
+                    if (locInfo[0] === "") {
+                        locInfo.shift();
+                    }
+        
+                    if (locInfo[0] === "") { return; }
+        
+                    let location = {};
+        
+                    locName = locInfo[0].split('#');
+        
+                    if (locName.length > 0) {
+                        location.name = locName[1].replace(/^\s+|\s+$/gm, '');
+                        location.id = locName[0].replace("Map ", "").replace(/^\s+|\s+$/gm, '');
+                        location.pokemon = {};
+        
+                        let locationId = "";
+                        for (var i = 1; i < locInfo.length; i++) {
+                            var iLoc = locInfo[i];
+                            if ((/Land|Water|OldRod|GoodRod|SuperRod|Cave|LandDay|LandNight|LandMorning|RockSmash/).test(iLoc)) {
+                                locationId = iLoc.toLowerCase();
+                                location.pokemon[locationId] = [];
+                            } else if ((/^(\d+,)+/).test(iLoc)) {
+                                continue;
+                            } else {
+                                var pokeInfo = iLoc.split(",");
+                                let pokemon = {};
+                                pokemon.name = pokeInfo[0];
+                                pokemon.lvl_low = pokeInfo[1];
+                                pokemon.lvl_high = pokeInfo[2];
+                                pokemon.encounter_rate = pokeInfo[3];
+                                location.pokemon[locationId].push(pokemon);
+                            }
+                        }
+                        locations.push(location);
+                    }
+                });
+        
+        
+        
+                locations.forEach(location => {
+                    var opt = document.createElement("OPTION");
+                    opt.value = "#"+location.id+ ": "+location.name;
+                    mapSelect.append(opt);
+                });
+            }
+            fetchData();
+            
+            var mapSelect = document.getElementById("locationList");
+            var mapInput = document.getElementById("locationSelector");
+                mapInput.addEventListener('focus', (evt) => {
+                    evt.target.value = null;
+                });
+                mapInput.addEventListener('change', (evt) => {
+                    evt.target.blur();
+                    var selectedOpt = evt.target.value.replace("#","");
+                    var locId = selectedOpt.split(': ')[0];
+                    var loc = locations.filter(l => { return l.id === locId; });
+        
+                    if(!loc) 
+                        return
+                    
+                    loc = loc[0];
+        
+                    var wrapper = document.createElement("DIV");
+                    wrapper.className = "locationWrapper";
+                    
+                    var head = document.createElement("H2");
+                    head.textContent = "Location: "+loc.name;
+                    wrapper.append(head);
+        
+                    var locInfo = document.querySelector("#locationInfo");
+                    locInfo.innerHTML = "";
+                    locInfo.append(wrapper);
+                    
+                    var typeList = document.createElement("ul");
+                    Object.getOwnPropertyNames(loc.pokemon).forEach(prop => {
+                        if(!loc.pokemon.hasOwnProperty(prop)) return;
+                        var type = document.createElement('ul');
+                        type.className = "list-group";
+                        type.id = prop;
+                        var typeHead = document.createElement('li');
+                        typeHead.className = "head list-group-item";
+                        switch(prop){
+                            case 'cave':
+                                typeHead.textContent = "Cave";
+                                break;
+                            case 'landday':
+                                typeHead.textContent = "Land (Day)";
+                                break;
+                            case 'landnight':
+                                typeHead.textContent = "Land (Night)";
+                                break;
+                            case 'landmorning':
+                                typeHead.textContent = "Land (Morning)";
+                                break;
+                            case 'rocksmash':
+                                typeHead.textContent = 'Rock Smash';
+                                break;
+                            case 'land':
+                                typeHead.textContent = 'Land';
+                                break;
+                            case 'water':
+                                typeHead.textContent = 'Water';
+                                break;
+                            case 'oldrod':
+                                typeHead.textContent = 'Old Rod';
+                                break;
+                            case 'goodrod':
+                                typeHead.textContent = 'Good Rod';
+                                break;
+                            case 'superrod':
+                                typeHead.textContent = 'Super Rod';
+                                break;
+                        }
+        
+                        
+                        type.append(typeHead);
+                        
+                        loc.pokemon[prop].forEach(poke => {
+                            if(poke.name == "") return;
+                            var pokeElem = document.createElement('li');
+                                pokeElem.className = "list-group-item justify-content-between align-items-start d-flex";
+                                pokeElem.innerHTML = "<div class='ms-2 me-auto'>"+poke.name+"</div>";
+        
+                            var lvlLow = document.createElement("span");
+                            lvlLow.textContent = poke.lvl_low;
+                            lvlLow.className = "lvlLow badge bg-primary rounded-pill";
+        
+                            var lvlHigh = document.createElement("span");
+                            lvlHigh.textContent = poke.lvl_high;
+                            lvlHigh.className = "lvlHigh badge bg-danger rounded-pill";
+        
+                            var rate = document.createElement("span");
+                            rate.textContent = poke.encounter_rate;
+                            rate.className = "encounterRate badge bg-success rounded-pill";
+                            
+                            pokeElem.append(lvlLow,lvlHigh,rate);
+        
+                            type.append(pokeElem);
+                        });
+        
+                        typeList.append(type);    
+                    });
+                    wrapper.append(typeList);
+                });
+            
+        </script>
 </body>
-<script>
-    async function fetchData() {
-
-        let rawData = await fetch(`./fusion.txt`)
-            
-        rawData = await rawData.text();
-
-        locBlocks = rawData.split(/##+\d*/)
-
-        locations = [];
-
-        locBlocks.forEach(loc => {
-            if(loc === "") { return; }
-
-            var locInfo = loc.split(/\n+/);
-
-            if(locInfo[0] === "") {
-                locInfo.shift();
-            }
-
-            if(locInfo[0] === "") { return; }
-
-            let location = {};
-
-            locName = locInfo[0].split('#');
-            
-            location.name = locName[1].replace(/^\s+|\s+$/gm,'');
-            location.id = locName[0].replace("Map ", "").replace(/^\s+|\s+$/gm,'');
-            location.pokemon = {};
-
-            let locationId = "";
-            for(var i = 1; i<locInfo.length; i++) {
-                var iLoc = locInfo[i];
-                if((/Land|Water|OldRod|GoodRod|SuperRod|Cave|LandDay|LandNight|LandMorning|RockSmash/).test(iLoc)) {
-                    locationId = iLoc.toLowerCase();
-                    location.pokemon[locationId] = [];
-                }else if ((/^(\d+,)+/).test(iLoc)) {
-                    continue;
-                } else {
-                    location.pokemon[locationId].push(iLoc);
-                }
-            }
-            
-            locations.push(location);
-        });
-    }
-
-
-    fetchData();
-</script>
 
 </html>
