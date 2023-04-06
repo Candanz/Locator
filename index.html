@@ -23,7 +23,7 @@
         locBlocks.forEach(loc => {
             if(loc === "") { return; }
 
-            var locInfo = loc.split(/\r\n+/);
+            var locInfo = loc.split(/\n+/);
 
             if(locInfo[0] === "") {
                 locInfo.shift();
