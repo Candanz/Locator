@@ -32,7 +32,11 @@
             if(locInfo[0] === "") { return; }
 
             let location = {};
-            location.name = locInfo[0];
+
+            locName = locInfo[0].split('#');
+            
+            location.name = locName[1];
+            location.id = locInfo[0].trim().replace("Map ");
             location.pokemon = {};
 
             let locationId = "";
