@@ -59,8 +59,13 @@
         
                 locBlocks.forEach(loc => {
                     if (loc === "") { return; }
-        
-                    var locInfo = loc.split(/\n+/);
+                    
+                    var locInfo;
+
+                    if(loc.indexOf("\r\n") > -1)
+                        locInfo = loc.split(/\r\n+/);
+                    else 
+                        locInfo = loc.split(/\n+/);
         
                     if (locInfo[0] === "") {
                         locInfo.shift();
@@ -136,76 +141,84 @@
                     locInfo.innerHTML = "";
                     locInfo.append(wrapper);
                     
-                    var typeList = document.createElement("ul");
                     Object.getOwnPropertyNames(loc.pokemon).forEach(prop => {
+                        var typeList = document.createElement("table");
+                        typeList.className = "table table-striped table-hover table-responsive";
+
                         if(!loc.pokemon.hasOwnProperty(prop)) return;
-                        var type = document.createElement('ul');
-                        type.className = "list-group";
+                        var row = document.createElement('thead');
+                        var type = document.createElement('th');
                         type.id = prop;
-                        var typeHead = document.createElement('li');
-                        typeHead.className = "head list-group-item";
+                        var typeHead = document.createElement('tr');
                         switch(prop){
                             case 'cave':
-                                typeHead.textContent = "Cave";
+                                type.textContent = "Cave";
                                 break;
                             case 'landday':
-                                typeHead.textContent = "Land (Day)";
+                                type.textContent = "Land (Day)";
                                 break;
                             case 'landnight':
-                                typeHead.textContent = "Land (Night)";
+                                type.textContent = "Land (Night)";
                                 break;
                             case 'landmorning':
-                                typeHead.textContent = "Land (Morning)";
+                                type.textContent = "Land (Morning)";
                                 break;
                             case 'rocksmash':
-                                typeHead.textContent = 'Rock Smash';
+                                type.textContent = 'Rock Smash';
                                 break;
                             case 'land':
-                                typeHead.textContent = 'Land';
+                                type.textContent = 'Land';
                                 break;
                             case 'water':
-                                typeHead.textContent = 'Water';
+                                type.textContent = 'Water';
                                 break;
                             case 'oldrod':
-                                typeHead.textContent = 'Old Rod';
+                                type.textContent = 'Old Rod';
                                 break;
                             case 'goodrod':
-                                typeHead.textContent = 'Good Rod';
+                                type.textContent = 'Good Rod';
                                 break;
                             case 'superrod':
-                                typeHead.textContent = 'Super Rod';
+                                type.textContent = 'Super Rod';
                                 break;
                         }
-        
+                        typeHead.append(type);
                         
-                        type.append(typeHead);
-                        
+                        ["Min Level", "Max Level", "Encounter Rate"].forEach(head => {
+                            var td = document.createElement("th");
+                                td.textContent = head;
+                                td.className = head.replace(" ", "_").toLowerCase();
+                                typeHead.append(td);
+                        });
+
+                    
+                        var pokeBody = document.createElement('tbody');
                         loc.pokemon[prop].forEach(poke => {
                             if(poke.name == "") return;
-                            var pokeElem = document.createElement('li');
-                                pokeElem.className = "list-group-item justify-content-between align-items-start d-flex";
-                                pokeElem.innerHTML = "<div class='ms-2 me-auto'>"+poke.name+"</div>";
-        
-                            var lvlLow = document.createElement("span");
-                            lvlLow.textContent = poke.lvl_low;
-                            lvlLow.className = "lvlLow badge bg-primary rounded-pill";
-        
-                            var lvlHigh = document.createElement("span");
-                            lvlHigh.textContent = poke.lvl_high;
-                            lvlHigh.className = "lvlHigh badge bg-danger rounded-pill";
-        
-                            var rate = document.createElement("span");
-                            rate.textContent = poke.encounter_rate;
-                            rate.className = "encounterRate badge bg-success rounded-pill";
+                            var pokeRow = document.createElement('tr');
                             
-                            pokeElem.append(lvlLow,lvlHigh,rate);
+                            var pokeElem = document.createElement('td');
+                                pokeElem.textContent = poke.name;
         
-                            type.append(pokeElem);
+                            var lvlLow = document.createElement("td");
+                            lvlLow.textContent = poke.lvl_low;
+        
+                            var lvlHigh = document.createElement("td");
+                            lvlHigh.textContent = poke.lvl_high;
+        
+                            var rate = document.createElement("td");
+                            rate.textContent = poke.encounter_rate;
+                            
+                            pokeRow.append(pokeElem,lvlLow,lvlHigh,rate);
+        
+                            pokeBody.append(pokeRow);
                         });
-        
-                        typeList.append(type);    
+                        
+                        typeList.append(typeHead);    
+                        typeList.append(pokeBody);
+                        wrapper.append(typeList);
                     });
-                    wrapper.append(typeList);
+                    
                 });
             
         </script>
